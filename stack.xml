@@ -1,0 +1,10 @@
+<stack>
+  <description brief="3d_teleop_visualization">3d_teleop_visualization</description>
+  <author>Maintained by William Woodall</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/3d_teleop_visualization</url>
+  <depend stack="ros" />
+  <depend stack="3d_teleop" />
+
+</stack>
