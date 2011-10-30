@@ -33,7 +33,7 @@ INCLUDE_DIRECTORIES(
 #rosbuild_gensrv()
 
 # Set sources and resources
-SET(SRCS src/main.cpp src/octree_vis_widget.cpp)
+SET(SRCS src/octree_vis_widget.cpp)
 SET(UIS ui/octree_vis_widget.ui)
 SET(HEADERS include/octree_vis_widget/octree_vis_widget.h)
 
@@ -49,9 +49,9 @@ SOURCE_GROUP("Generated" FILES
   ${MOC_SRCS}
 )
 
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
+rosbuild_add_library(${PROJECT_NAME} ${SRCS} ${UI_SRCS} ${MOC_SRCS})
+target_link_libraries(${PROJECT_NAME} QVTK)
 
 
-rosbuild_add_executable(octree_vis_widget ${SRCS} ${UI_SRCS} ${MOC_SRCS})
-target_link_libraries(octree_vis_widget QVTK)
+rosbuild_add_executable(octree_vis_widget_node src/octree_vis_widget_node.cpp)
+target_link_libraries(octree_vis_widget_node ${PROJECT_NAME})
