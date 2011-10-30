@@ -1,0 +1,17 @@
+<package>
+  <description brief="octree_vis_widget">
+
+     octree_vis_widget
+
+  </description>
+  <author>William Woodall</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/octree_vis_widget</url>
+
+  <rosdep name="qt4"/>
+  <rosdep name="libvtk"/>
+
+</package>
+
+
