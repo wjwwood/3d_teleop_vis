@@ -1,0 +1,20 @@
+<package>
+  <description brief="teleop_client">
+
+     teleop_client
+
+  </description>
+  <author>William Woodall</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/teleop_client</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="roslib"/>
+  <depend package="tf"/>
+  <depend package="octomap"/>
+  <depend package="octomap_ros"/>
+
+</package>
+
+
