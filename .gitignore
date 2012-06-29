@@ -2,3 +2,5 @@ build
 lib
 bin
 *.bt
+*.pyc
+*.cfgc

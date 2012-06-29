@@ -13,7 +13,12 @@
   <depend package="roslib"/>
   <depend package="tf"/>
   <depend package="octomap"/>
-  <depend package="octomap_ros"/>
+  <depend package="dynamic_reconfigure"/>
+  <depend package="geometry_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="visualization_msgs"/>
+  <depend package="sensor_msgs"/>
+  <!-- <depend package="octomap_ros"/> -->
 
 </package>
 

@@ -1,0 +1,9 @@
+\subsubsection usage Usage
+\verbatim
+<node name="latency_reduction" pkg="teleop_client" type="latency_reduction">
+  <param name="send_latency" type="double" value="0.0" />
+  <param name="receive_latency" type="double" value="0.0" />
+  <param name="use_one_latency" type="bool" value="True" />
+</node>
+\endverbatim
+
