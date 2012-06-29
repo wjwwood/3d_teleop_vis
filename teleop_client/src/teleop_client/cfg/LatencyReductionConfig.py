@@ -40,7 +40,9 @@
 ##  POSSIBILITY OF SUCH DAMAGE.
 ##**********************************************************/
 
-config_description = [{'srcline': 9, 'description': "The latency added to sending cmd_vel's", 'max': 4.0, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '../cfg/LatencyReduction.cfg', 'name': 'send_latency', 'edit_method': '', 'default': 0.0, 'level': 0, 'min': 0.0, 'type': 'double'}, {'srcline': 10, 'description': 'The latency added to receiving telemetry', 'max': 1.0, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '../cfg/LatencyReduction.cfg', 'name': 'receive_latency', 'edit_method': '', 'default': 0.0, 'level': 0, 'min': 0.0, 'type': 'double'}, {'srcline': 11, 'description': 'If enabled, only the send_latency will be used on both directions of communication.', 'max': True, 'cconsttype': 'const bool', 'ctype': 'bool', 'srcfile': '../cfg/LatencyReduction.cfg', 'name': 'use_one_latency', 'edit_method': '', 'default': True, 'level': 0, 'min': False, 'type': 'bool'}]
+from dynamic_reconfigure.encoding import extract_params
+
+config_description = {'upper': 'DEFAULT', 'lower': 'groups', 'srcline': 228, 'name': 'Default', 'parent': 0, 'srcfile': '/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py', 'cstate': 'true', 'parentname': 'Default', 'class': 'DEFAULT', 'field': 'default', 'state': True, 'parentclass': '', 'groups': [], 'parameters': [{'srcline': 254, 'description': "The latency added to sending cmd_vel's", 'max': 4.0, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py', 'name': 'send_latency', 'edit_method': '', 'default': 0.0, 'level': 0, 'min': 0.0, 'type': 'double'}, {'srcline': 254, 'description': 'The latency added to receiving telemetry', 'max': 1.0, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py', 'name': 'receive_latency', 'edit_method': '', 'default': 0.0, 'level': 0, 'min': 0.0, 'type': 'double'}, {'srcline': 254, 'description': 'If enabled, only the send_latency will be used on both directions of communication.', 'max': True, 'cconsttype': 'const bool', 'ctype': 'bool', 'srcfile': '/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py', 'name': 'use_one_latency', 'edit_method': '', 'default': True, 'level': 0, 'min': False, 'type': 'bool'}], 'type': '', 'id': 0}
 
 min = {}
 max = {}
@@ -49,7 +51,14 @@ level = {}
 type = {}
 all_level = 0
 
-for param in config_description:
+#def extract_params(config):
+#    params = []
+#    params.extend(config['parameters'])    
+#    for group in config['groups']:
+#        params.extend(extract_params(group))
+#    return params
+
+for param in extract_params(config_description):
     min[param['name']] = param['min']
     max[param['name']] = param['max']
     defaults[param['name']] = param['default']

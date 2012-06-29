@@ -96,12 +96,12 @@ class LatencyReductionNode(object):
         time = current_pose.header.stamp.to_sec()
         current_cmd_vel = cmd_vel_list.pop(0)
         sim_path = []
-        state = [current_pose.pose.pose.position.x,
-                 current_pose.pose.pose.position.y,
-                 efq([current_pose.pose.pose.orientation.x,
-                      current_pose.pose.pose.orientation.y,
-                      current_pose.pose.pose.orientation.z,
-                      current_pose.pose.pose.orientation.w])]
+        state = [current_pose.transform.translation.x,
+                 current_pose.transform.translation.y,
+                 efq([current_pose.transform.rotation.x,
+                      current_pose.transform.rotation.y,
+                      current_pose.transform.rotation.z,
+                      current_pose.transform.rotation.w])]
         dk = DifferentialKinematics(1.0, 1.0, state[0], state[1], state[2][2])
         # print('Entering sim...')
         while time < now and not rospy.is_shutdown():
@@ -249,44 +249,22 @@ class LatencyReductionNode(object):
 
     def on_cmd_vel(self, msg):
         """This is the callback to handle incoming cmd_vel's"""
-        # now = rospy.Time.now().to_sec()
-        # time = now + self.send_latency
-        # with self.cmd_vel_lock:
-        #     self.cmd_vel_list.append((time, msg))
-        # diff = time - now
-        # if diff > 0.001:
-        #     sleep(diff)
-        # self.cmd_vel_pub.publish(msg)
         time = rospy.Time.now().to_sec() + self.send_latency
         self.cmd_vel_pub.publish(msg, time)
         with self.cmd_vel_lock:
             self.cmd_vel_list.append((time, msg))
 
-    def on_odom(self, msg):
-        """Called when new vehicle telemtry is received"""
-        now = rospy.Time.now().to_sec()
-        time = msg.header.stamp.to_sec()
-        if self.use_one_latency:
-            time += self.send_latency
-        else:
-            time += self.receive_latency
-        diff = time - now
-        if diff > 0:
-            sleep(diff)
-        self.current_pose = msg
-
     def on_tf(self, msg):
         """Used to delay tf broadcast"""
-        now = rospy.Time.now().to_sec()
         time = msg.transforms[0].header.stamp.to_sec()
         if self.use_one_latency:
             time += self.send_latency
         else:
             time += self.receive_latency
-        diff = time - now
-        if diff > 0:
-            sleep(diff)
-        self.tf_pub.publish(msg)
+        self.tf_pub.publish(msg, time)
+        for transform in msg.transforms:
+            if 'odom' in transform.header.frame_id:
+                self.current_pose = transform
 
     def on_dynamic_reconfigure(self, config, level):
         """This is the callback for dynamic reconfigure events"""
@@ -296,35 +274,40 @@ class LatencyReductionNode(object):
         return config
 
     def on_scan(self, msg):
-        now = rospy.Time.now().to_sec()
         time = msg.header.stamp.to_sec()
         if self.use_one_latency:
             time += self.send_latency
         else:
             time += self.receive_latency
-        diff = time - now
-        if diff > 0:
-            sleep(diff)
-        self.scan_pub.publish(msg)
+        self.scan_pub.publish(msg, time)
+
+    def on_visualization_marker(self, msg):
+        time = msg.markers[0].header.stamp.to_sec()
+        if self.use_one_latency:
+            time += self.send_latency
+        else:
+            time += self.receive_latency
+        self.vis_pub.publish(msg, time)
 
     def setup_ros_comms(self):
         """Sets up ROS communications"""
         self.dr_server = Server(LatencyReductionConfig, self.on_dynamic_reconfigure)
+
         self.cmd_vel_pub = LatentPublisher('/atrv_node/cmd_vel', Twist)
-        # self.cmd_vel_pub = rospy.Publisher('/atrv_node/cmd_vel', Twist)
-        # self.cmd_vel_pub = rospy.Publisher('/latency_reduction/cmd_vel', Twist)
+
         self.path_pub = rospy.Publisher('/model_path', Path)
         self.pose_array_pub = rospy.Publisher('/path_poses', PoseArray)
         self.marker_array_pub = rospy.Publisher('/path_markers', MarkerArray)
-        self.tf_pub = rospy.Publisher('/tf_delayed', tfMessage)
-        self.scan_pub = rospy.Publisher('/scan_delayed', LaserScan)
+
+        self.tf_pub = LatentPublisher('/tf', tfMessage)
+        self.scan_pub = LatentPublisher('/scan_delayed', LaserScan)
+        self.vis_pub = LatentPublisher('/visualization_markers_delayed', MarkerArray)
         from time import sleep
         sleep(1.0)
-        rospy.Subscriber('/cmd_vel', Twist, self.on_cmd_vel, queue_size=1000)
-        # rospy.Subscriber('/atrv_node/cmd_vel', Twist, self.on_cmd_vel)
-        rospy.Subscriber('/atrv_node/odom', Odometry, self.on_odom)
-        rospy.Subscriber('/tf', tfMessage, self.on_tf)
+        rospy.Subscriber('/cmd_vel', Twist, self.on_cmd_vel)
+        rospy.Subscriber('/tf_filt', tfMessage, self.on_tf)
         rospy.Subscriber('/scan_filtered', LaserScan, self.on_scan)
+        rospy.Subscriber('/visualization_markers', MarkerArray, self.on_visualization_marker)
 
     def get_ros_params(self):
         """Gets the ROS parameters"""
