@@ -1,0 +1,5 @@
+# This repo contains the 3D Teleop Client Code
+- git:
+    local-name: 3d_teleop_vis
+    uri: 'https://github.com/wjwwood/3d_teleop_vis.git'
+    version: 'master'
