@@ -1,0 +1,2 @@
+local_pubs: [/atrv_node/cmd_vel]
+foreign_pubs: [/scan_filtered, /tf_filt, /atrv_node/odom, /atrv_node/cmd_vel, /visualization_markers]
