@@ -1,0 +1,21 @@
+<launch>
+    <node pkg="teleop_client" type="latency_reduction.py" name="latency_reduction" output="screen" />
+    <node pkg="teleop_client" type="latency_inducer.py" name="latency_inducer1" output="screen">
+        <param name="in_topic" value="/map_vis"/>
+        <remap from="/latency_source" to="/receive_latency"/>
+    </node>
+    <node pkg="teleop_client" type="latency_inducer.py" name="latency_inducer2" output="screen">
+        <param name="in_topic" value="/scan_filtered"/>
+        <remap from="/latency_source" to="/receive_latency"/>
+    </node>
+    <node pkg="teleop_client" type="latency_inducer.py" name="latency_inducer3" output="screen">
+        <param name="in_topic" value="/tf_filt"/>
+        <param name="out_topic" value="/tf"/>
+        <remap from="/latency_source" to="/receive_latency"/>
+    </node>
+    <node pkg="teleop_client" type="latency_inducer.py" name="latency_inducer4" output="screen">
+        <param name="in_topic" value="/asus/rgb/image_color/compressed"/>
+        <param name="out_topic" value="/asus/rgb/image_delayed/compressed"/>
+        <remap from="/latency_source" to="/receive_latency"/>
+    </node>
+</launch>

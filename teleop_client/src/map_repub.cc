@@ -83,15 +83,17 @@ void publishMapAsMarkers(OcTree& octree) {
       double x = it.getX();
       double y = it.getY();
       double z = it.getZ();
-      size_t depth = it.getDepth();
-      // Insert a point for the leaf's cube
-      geometry_msgs::Point leaf_origin;
-      leaf_origin.x = x;
-      leaf_origin.y = y;
-      leaf_origin.z = z;
-      msg.markers[depth].points.push_back(leaf_origin);
-      // Determine and set the leaf's color by height
-      msg.markers[depth].colors.push_back(getColorByHeight(leaf_origin.z));
+      if (z > 0.1 && z < 2.0) {
+        size_t depth = it.getDepth();
+        // Insert a point for the leaf's cube
+        geometry_msgs::Point leaf_origin;
+        leaf_origin.x = x;
+        leaf_origin.y = y;
+        leaf_origin.z = z;
+        msg.markers[depth].points.push_back(leaf_origin);
+        // Determine and set the leaf's color by height
+        msg.markers[depth].colors.push_back(getColorByHeight(leaf_origin.z));
+      }
     }
   }
   // Finish the marker array setup
@@ -118,10 +120,10 @@ void publishMapAsMarkers(OcTree& octree) {
 void binary_map_callback(const octomap_msgs::OctomapBinary::ConstPtr& msg) {
 	OcTree octomap(0.025);
 	std::stringstream datastream;
-    assert(msg->data.size() > 0);
-    datastream.write((const char*) &msg->data[0], msg->data.size());
-    octomap.readBinary(datastream);
-    publishMapAsMarkers(octomap);
+  assert(msg->data.size() > 0);
+  datastream.write((const char*) &msg->data[0], msg->data.size());
+  octomap.readBinary(datastream);
+  publishMapAsMarkers(octomap);
 }
 
 int main(int argc, char **argv)
@@ -130,7 +132,9 @@ int main(int argc, char **argv)
 
   ros::NodeHandle n;
 
-  map_pub = n.advertise<visualization_msgs::MarkerArray>("/map_vis", 1000);
+  map_pub = n.advertise<visualization_msgs::MarkerArray>("/map_vis", 1);
+
+  ros::Subscriber sub = n.subscribe("/octree", 1, binary_map_callback);
 
   ros::spin();
 

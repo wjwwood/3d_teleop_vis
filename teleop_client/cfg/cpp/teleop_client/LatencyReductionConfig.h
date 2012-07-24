@@ -435,7 +435,7 @@ LatencyReductionConfig::GroupDescription<LatencyReductionConfig::DEFAULT, Latenc
 //#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.receive_latency = 0.0;
 //#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
-      __max__.receive_latency = 1.0;
+      __max__.receive_latency = 4.0;
 //#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.receive_latency = 0.0;
 //#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"

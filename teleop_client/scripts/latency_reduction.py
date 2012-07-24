@@ -32,6 +32,7 @@ from geometry_msgs.msg import Twist, PoseStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry, Path
 from visualization_msgs.msg import MarkerArray, Marker
 from sensor_msgs.msg import LaserScan
+from std_msgs.msg import Float32
 
 from teleop_client.differential_kinematics import DifferentialKinematics
 
@@ -110,7 +111,7 @@ class LatencyReductionNode(object):
             time += period
             # Check for new input
             if cmd_vel_list and current_cmd_vel[0] < time:
-                if cmd_vel_list[0][0] <= time:
+                while cmd_vel_list and cmd_vel_list[0][0] <= time:
                     current_cmd_vel = cmd_vel_list.pop(0)
             # Use the input, the state, and the period to step the model
             dk.linear_velocity = current_cmd_vel[1].linear.x
@@ -249,28 +250,38 @@ class LatencyReductionNode(object):
 
     def on_cmd_vel(self, msg):
         """This is the callback to handle incoming cmd_vel's"""
-        time = rospy.Time.now().to_sec() + self.send_latency
+        now = rospy.Time.now().to_sec()
+        time = now + self.send_latency
         self.cmd_vel_pub.publish(msg, time)
         with self.cmd_vel_lock:
-            self.cmd_vel_list.append((time, msg))
+            self.cmd_vel_list.append((now, msg))
 
     def on_tf(self, msg):
+        for transform in msg.transforms:
+            if 'odom' in transform.header.frame_id:
+                self.current_pose = transform
+
+    def on_tf_filt(self, msg):
         """Used to delay tf broadcast"""
+        # now = rospy.Time.now().to_sec()
         time = msg.transforms[0].header.stamp.to_sec()
+        # print(time-now)
         if self.use_one_latency:
             time += self.send_latency
         else:
             time += self.receive_latency
         self.tf_pub.publish(msg, time)
-        for transform in msg.transforms:
-            if 'odom' in transform.header.frame_id:
-                self.current_pose = transform
 
     def on_dynamic_reconfigure(self, config, level):
         """This is the callback for dynamic reconfigure events"""
         self.send_latency = config['send_latency']
         self.receive_latency = config['receive_latency']
         self.use_one_latency = config['use_one_latency']
+        self.send_latency_pub.publish(Float32(self.send_latency))
+        if self.use_one_latency:
+            self.receive_latency_pub.publish(Float32(self.send_latency))
+        else:
+            self.receive_latency_pub.publish(Float32(self.receive_latency))
         return config
 
     def on_scan(self, msg):
@@ -291,6 +302,12 @@ class LatencyReductionNode(object):
 
     def setup_ros_comms(self):
         """Sets up ROS communications"""
+        self.receive_latency_pub = rospy.Publisher('/receive_latency', Float32, latch=True)
+        self.send_latency_pub = rospy.Publisher('/send_latency', Float32, latch=True)
+        from time import sleep
+        sleep(1.0)
+        self.receive_latency_pub.publish(Float32(0))
+        self.send_latency_pub.publish(Float32(0))
         self.dr_server = Server(LatencyReductionConfig, self.on_dynamic_reconfigure)
 
         self.cmd_vel_pub = LatentPublisher('/atrv_node/cmd_vel', Twist)
@@ -299,15 +316,16 @@ class LatencyReductionNode(object):
         self.pose_array_pub = rospy.Publisher('/path_poses', PoseArray)
         self.marker_array_pub = rospy.Publisher('/path_markers', MarkerArray)
 
-        self.tf_pub = LatentPublisher('/tf', tfMessage)
-        self.scan_pub = LatentPublisher('/scan_delayed', LaserScan)
-        self.vis_pub = LatentPublisher('/visualization_markers_delayed', MarkerArray)
+        # self.tf_pub = LatentPublisher('/tf', tfMessage)
+        # self.scan_pub = LatentPublisher('/scan_delayed', LaserScan)
+        # self.vis_pub = LatentPublisher('/visualization_markers_delayed', MarkerArray)
         from time import sleep
         sleep(1.0)
         rospy.Subscriber('/cmd_vel', Twist, self.on_cmd_vel)
-        rospy.Subscriber('/tf_filt', tfMessage, self.on_tf)
-        rospy.Subscriber('/scan_filtered', LaserScan, self.on_scan)
-        rospy.Subscriber('/visualization_markers', MarkerArray, self.on_visualization_marker)
+        # rospy.Subscriber('/tf_filt', tfMessage, self.on_tf_filt)
+        rospy.Subscriber('/tf', tfMessage, self.on_tf)
+        # rospy.Subscriber('/scan_filtered', LaserScan, self.on_scan)
+        # rospy.Subscriber('/map_vis', MarkerArray, self.on_visualization_marker)
 
     def get_ros_params(self):
         """Gets the ROS parameters"""

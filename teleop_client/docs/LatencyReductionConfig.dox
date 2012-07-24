@@ -3,6 +3,6 @@
 Reads and maintains the following parameters on the ROS server
 
 - \b "~send_latency" : \b [double] The latency added to sending cmd_vel's min: 0.0, default: 0.0, max: 4.0
-- \b "~receive_latency" : \b [double] The latency added to receiving telemetry min: 0.0, default: 0.0, max: 1.0
+- \b "~receive_latency" : \b [double] The latency added to receiving telemetry min: 0.0, default: 0.0, max: 4.0
 - \b "~use_one_latency" : \b [bool] If enabled, only the send_latency will be used on both directions of communication. min: False, default: True, max: True
 
