@@ -1,21 +1,50 @@
 <launch>
-    <node pkg="teleop_client" type="latency_reduction.py" name="latency_reduction" output="screen" />
-    <node pkg="teleop_client" type="latency_inducer.py" name="latency_inducer1" output="screen">
+    <!-- Multimaster that handles communication with the robot -->
+    <arg name="master" />
+    <node pkg="multimaster" type="master_sync.py" name="master_sync"
+          output="screen">
+        <param name="foreign_master" value="http://$(arg master):11311" />
+        <rosparam command="load" file="$(find multimaster)/config.yaml" />
+    </node>
+
+    <!-- Start Latency Reduction -->
+    <node pkg="teleop_client" type="latency_reduction.py"
+          name="latency_reduction" output="screen" />
+
+    <!-- Start Latency Inducer for 3D Map -->
+    <node pkg="teleop_client" type="latency_inducer.py"
+          name="latency_inducer1" output="screen">
         <param name="in_topic" value="/map_vis"/>
         <remap from="/latency_source" to="/receive_latency"/>
     </node>
-    <node pkg="teleop_client" type="latency_inducer.py" name="latency_inducer2" output="screen">
+
+    <!-- Start Latency Inducer for Laser Scans -->
+    <node pkg="teleop_client" type="latency_inducer.py"
+          name="latency_inducer2" output="screen">
         <param name="in_topic" value="/scan_filtered"/>
         <remap from="/latency_source" to="/receive_latency"/>
     </node>
-    <node pkg="teleop_client" type="latency_inducer.py" name="latency_inducer3" output="screen">
+
+    <!-- Start Latency Inducer for Transform Data -->
+    <node pkg="teleop_client" type="latency_inducer.py"
+          name="latency_inducer3" output="screen">
         <param name="in_topic" value="/tf_filt"/>
         <param name="out_topic" value="/tf"/>
         <remap from="/latency_source" to="/receive_latency"/>
     </node>
-    <node pkg="teleop_client" type="latency_inducer.py" name="latency_inducer4" output="screen">
+
+    <!-- Start Latency Inducer for Images -->
+    <node pkg="teleop_client" type="latency_inducer.py"
+          name="latency_inducer4" output="screen">
         <param name="in_topic" value="/asus/rgb/image_color/compressed"/>
         <param name="out_topic" value="/asus/rgb/image_delayed/compressed"/>
         <remap from="/latency_source" to="/receive_latency"/>
     </node>
+
+    <!-- Start Joystick Nodes -->
+    <node pkg="joy" type="joy_node" name="joy_node" output="screen" />
+
+    <!-- Start the map republisher -->
+    <node pkg="teleop_client" type="map_repub" name="map_repub"
+          output="screen" />
 </launch>
